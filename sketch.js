@@ -26,7 +26,7 @@ const FIELD = [
   "0,0,0,1,0,0,0,0,0,2,0,0,0,0,0,0,1,0,1,0",
   "0,3,0,1,1,3,1,1,1,1,1,0,1,1,1,1,1,0,0,0",
   "0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,0",
-  "0,1,1,3,1,1,1,3,0,3,1,1,1,1,1,1,1,1,1,0",
+  "0,1,1,3,6,1,1,3,0,3,1,1,1,1,1,1,1,1,1,0",
   "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1",
 ];
 
@@ -96,7 +96,7 @@ function drawHUD() {
 
 		if (field[i].intact) {
 
-			if (field[i].type != "BLOOEY" && field[i].type != "RAT")
+      if (field[i].type != "BLOOEY" && field[i].type != "RAT" && field[i].type != "CLOOEY")
 				field[i].draw();
 		}
 	}
@@ -162,6 +162,13 @@ function generateField() {
           enemyId++;
           break;
 
+        case "CLOOEY":
+          var cbehavior = (enemyId % 2); // every other ghost will be agressive
+          enemys.push(new Tile(j, i, type, cbehavior));
+          f.push(new Tile(j, i, "OPEN"));
+          enemyId++;
+          break;
+
         case "BARRIER":
           f.push(tile);
           break;
@@ -179,6 +186,10 @@ function generateField() {
           endScore--; // worth 1 point
           f.push(tile);
           break;
+        case "STEAL":
+          endScore = endScore / 2; //steal half of the candies
+          f.push(tile);
+          break;  
       }
 
     }

@@ -6,8 +6,10 @@ const TYPES = [
 	"OPEN",
 	"BLOWUP",
 	"CANDY",
-	"BLOOEY",
-	"RAT"
+  "BLOOEY",
+  "RAT",
+  "CLOOEY", 
+  "STEAL"
 ];
 
 const TILE_SPEED = 0.2; // speed of tile's movement
@@ -35,7 +37,7 @@ function Tile(x, y, type, behavior) {
 
   this.intact = true;
 
-  this.speed = 0.2;
+  this.speed = 0.1;
 
   this.behavior = behavior; // BLOOEY only;	0 = agressive, 1 = nonchalant
 }
@@ -86,6 +88,11 @@ Tile.prototype.update = function() {
           score++;	
           destinationTile.intact = false;
           break;
+
+        case "STEAL":
+          score = score / 2; //steal half of the candy
+          destinationTile.intact = false;
+          break;
       }
     }
 
@@ -134,6 +141,50 @@ Tile.prototype.update = function() {
 			// move nonchalantly
       var index = Math.floor(random(4));
       this.move(possibleMoves[index].x, possibleMoves[index].y, false);
+    }  
+
+  } else if (this.type == "CLOOEY") {
+    /* BLOOEY AI */
+
+		var cdistance = dist(rat.x, rat.y, this.x, this.y);
+
+    if (cdistance < 0.3) 
+      score = score / 2;
+
+		/* movement */
+    if (this.moving) // can't move multiple times at once
+      return;
+
+		/* relative possible movements */
+    var cpossibleMoves = [
+
+      getTile(this.x - 1, this.y),	// left
+      getTile(this.x + 1, this.y),	// right
+      getTile(this.x, this.y - 1),	// top
+      getTile(this.x, this.y + 1),	// bottom
+    ];
+
+    /* sort by distance from Pac-man */
+    cpossibleMoves.sort(function (a, b) {
+
+      var aD = dist(a.x, a.y, rat.x, rat.y);
+      var bD = dist(b.x, b.y, rat.x, rat.y);
+
+      return aD - bD;
+    });
+
+    if (this.behavior === 0) {	// if they're agressive
+
+      for (var J = 0; J < cpossibleMoves.length; J++) {
+
+        if (this.move(cpossibleMoves[J].x, cpossibleMoves[J].y, false)) { // attempt to move
+          break;
+        }
+      }
+    } else {
+			// move nonchalantly
+      var cindex = Math.floor(random(4));
+      this.move(cpossibleMoves[cindex].x, cpossibleMoves[cindex].y, false);
     }
 
   }
@@ -153,7 +204,7 @@ Tile.prototype.draw = function() {
       
     case "OPEN":
       noStroke();
-      fill(255)
+      fill(255);
       break;
 
     case "BLOWUP":
@@ -163,6 +214,15 @@ Tile.prototype.draw = function() {
       fill("#0FF0FF");
       rect(this.x * SIZE, this.y * SIZE, SIZE, SIZE);
       break;
+
+    case "STEAL":
+
+      strokeWeight(5);
+      stroke(0);
+      fill("#0FF0FF");
+      rect(this.x * SIZE, this.y * SIZE, SIZE, SIZE);
+      break;
+
     case "CANDY":
 
       ellipseMode(CORNER);
@@ -179,6 +239,20 @@ Tile.prototype.draw = function() {
       strokeWeight(1);
 
 			/* draw a triangle */
+      beginShape();
+      vertex(this.x * SIZE + HALF_SIZE, this.y * SIZE + QUARTER_SIZE);
+      vertex(this.x * SIZE + QUARTER_SIZE, this.y * SIZE + (QUARTER_SIZE * 3));
+      vertex(this.x * SIZE + (QUARTER_SIZE * 3), this.y * SIZE + (QUARTER_SIZE * 3));
+      endShape(CLOSE);
+      break;
+
+    case "CLOOEY":
+
+      fill("#a9abca");
+      stroke(0);
+      strokeWeight(1);
+  
+      /* draw a triangle */
       beginShape();
       vertex(this.x * SIZE + HALF_SIZE, this.y * SIZE + QUARTER_SIZE);
       vertex(this.x * SIZE + QUARTER_SIZE, this.y * SIZE + (QUARTER_SIZE * 3));
@@ -225,11 +299,16 @@ Tile.prototype.move = function(x, y, relative) {
   var type = destinationTile.type;
 
   if ((type == "BARRIER" && this.type != "BARRIER") ||  // only certain tiles may
-      (type == "BLOOEY" && this.type == "BLOOEY")) 				// move to other certain tiles
+      (type == "BLOOEY" && this.type == "BLOOEY") ||
+      (type == "CLOOEY" && this.type == "CLOOEY"))
     return false;
   
   if (this.type == "BLOOEY"){
     if (type == "BLOWUP" && this.type != "BLOWUP")
+      return false;
+  }
+  if (this.type == "CLOOEY"){
+    if (type == "STEAL" && this.type != "STEAL")
       return false;
   }
 
