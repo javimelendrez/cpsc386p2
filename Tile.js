@@ -1,4 +1,4 @@
-//the cure 
+//the cure 386-01
 //this js file contains the main logic to winning, collecting candies, movement
 /**
 	* all different types of tiles
