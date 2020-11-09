@@ -9,7 +9,8 @@ const TYPES = [
   "BLOOEY",
   "RAT",
   "CLOOEY", 
-  "STEAL"
+  "STEAL",
+  "END"
 ];
 
 const TILE_SPEED = 0.2; // speed of tile's movement
@@ -93,11 +94,15 @@ Tile.prototype.update = function() {
           score = score / 2; //steal half of the candy
           destinationTile.intact = false;
           break;
+          
+                
+        case "END":
+          if(score >= 10)
+            endGame(true);
+          if(score < 10)
+            endGame(false);
       }
     }
-
-    if (score == endScore) // check if Pac-man has won
-      endGame(true);
 
   } else if (this.type == "BLOOEY") {
     /* BLOOEY AI */
@@ -269,6 +274,13 @@ Tile.prototype.draw = function() {
       ellipse(this.x * SIZE + QUARTER_SIZE, this.y * SIZE + QUARTER_SIZE, HALF_SIZE);
       break;
 
+    case "END":
+
+      strokeWeight(5);
+      stroke(0);
+      fill("#FF0000");
+      rect(this.x * SIZE, this.y * SIZE, SIZE, SIZE);
+      break;
   }
 
 };
