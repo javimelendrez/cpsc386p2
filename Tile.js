@@ -1,3 +1,5 @@
+//the cure 
+//this js file contains the main logic to winning, collecting candies, movement
 /**
 	* all different types of tiles
 	*/
@@ -10,7 +12,8 @@ const TYPES = [
   "RAT",
   "CLOOEY", 
   "STEAL",
-  "END"
+  "END",
+  "SCREWY"
 ];
 var contact = 0;
 
@@ -163,6 +166,8 @@ Tile.prototype.update = function() {
         if( score >= 2 ){
           //round the score up
           score = Math.ceil(score / 2);
+          //cloeey stopps moving because it is eating
+          this.speed = 0;
           contact = 1;
         } else{
           score = 0;
@@ -171,6 +176,53 @@ Tile.prototype.update = function() {
       } 
     }else{
       console.log("clooey is eating")
+    }
+
+
+		/* movement */
+    if (this.moving) // can't move multiple times at once
+      return;
+
+		/* relative possible movements */
+    var cpossibleMoves = [
+
+      getTile(this.x - 1, this.y),	// left
+      getTile(this.x + 1, this.y),	// right
+      getTile(this.x, this.y - 1),	// top
+      getTile(this.x, this.y + 1),	// bottom
+    ];
+
+    /* sort by distance from Pac-man */
+    cpossibleMoves.sort(function (a, b) {
+
+      var aD = dist(a.x, a.y, rat.x, rat.y);
+      var bD = dist(b.x, b.y, rat.x, rat.y);
+
+      return aD - bD;
+    });
+
+    if (this.behavior === 0) {	// if they're agressive
+
+      for (var J = 0; J < cpossibleMoves.length; J++) {
+
+        if (this.move(cpossibleMoves[J].x, cpossibleMoves[J].y, false)) { // attempt to move
+          break;
+        }
+      }
+    } else {
+			// move nonchalantly
+      var cindex = Math.floor(random(4));
+      this.move(cpossibleMoves[cindex].x, cpossibleMoves[cindex].y, false);
+    }
+
+  } else if (this.type == "SCREWY") {
+    /* screwy AI */
+
+    var cdistance = dist(rat.x, rat.y, this.x, this.y);
+    //SCREWY does nothing but just take space on the map
+      if (cdistance < 0.3){
+       
+      console.log("THIS DUDE LEGIT DOES NOTHING ON CONTACT HES JUST THERE")
     }
 
 
@@ -283,6 +335,20 @@ Tile.prototype.draw = function() {
       endShape(CLOSE);
       break;
 
+    case "SCREWY":
+
+        fill("#DC00FF");
+        stroke(0);
+        strokeWeight(1);
+    
+        /* draw a triangle */
+        beginShape();
+        vertex(this.x * SIZE + HALF_SIZE, this.y * SIZE + QUARTER_SIZE);
+        vertex(this.x * SIZE + QUARTER_SIZE, this.y * SIZE + (QUARTER_SIZE * 3));
+        vertex(this.x * SIZE + (QUARTER_SIZE * 3), this.y * SIZE + (QUARTER_SIZE * 3));
+        endShape(CLOSE);
+        break;
+
     case "RAT":
 
       ellipseMode(CORNER);
@@ -330,7 +396,8 @@ Tile.prototype.move = function(x, y, relative) {
 
   if ((type == "BARRIER" && this.type != "BARRIER") ||  // only certain tiles may
       (type == "BLOOEY" && this.type == "BLOOEY") ||
-      (type == "CLOOEY" && this.type == "CLOOEY"))
+      (type == "CLOOEY" && this.type == "CLOOEY") ||
+      (type == "SCREWY" && this.type == "SCREWY"))
     return false;
   
   if (this.type == "BLOOEY"){
@@ -341,7 +408,10 @@ Tile.prototype.move = function(x, y, relative) {
     if (type == "STEAL" && this.type != "STEAL")
       return false;
   }
-
+  if (this.type == "SCREWY"){
+    if (type == "BLOWUP" && this.type != "BLOWUP")
+      return false;
+  }
   this.moving = true; // begin movement next update
 	this.destination = createVector(destinationX, destinationY);
 

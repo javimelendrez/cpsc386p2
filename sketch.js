@@ -1,4 +1,6 @@
-
+//team cure
+//this js file holds the main draw function
+//also contains the field where every barrier, rat, candy, and ghost is located
 /** 2D map of the field;
  * 0 = BARRIER
  * 1 = OPEN
@@ -28,7 +30,7 @@ const FIELD = [
   "0,0,0,1,0,0,0,0,0,2,0,0,0,0,0,0,1,0,1,0",
   "0,3,0,1,1,3,1,1,1,1,1,0,1,1,1,1,1,0,0,0",
   "0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,0",
-  "0,1,1,3,6,1,1,3,0,3,1,1,1,1,1,1,1,1,8,0",
+  "0,1,1,3,6,1,1,3,0,3,1,1,1,1,1,1,1,9,8,0",
   "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
 ];
 
@@ -98,7 +100,7 @@ function drawHUD() {
 
 		if (field[i].intact) {
 
-      if (field[i].type != "BLOOEY" && field[i].type != "RAT" && field[i].type != "CLOOEY")
+      if (field[i].type != "BLOOEY" && field[i].type != "RAT" && field[i].type != "CLOOEY" && field[i].type != "SCREWY")
 				field[i].draw();
 		}
 	}
@@ -170,6 +172,13 @@ function generateField() {
           f.push(new Tile(j, i, "OPEN"));
           enemyId++;
           break;
+
+        case "SCREWY":
+            var cbehavior = (enemyId % 2); // every other ghost will be agressive
+            enemys.push(new Tile(j, i, type, cbehavior));
+            f.push(new Tile(j, i, "OPEN"));
+            enemyId++;
+            break;
 
         case "BARRIER":
           f.push(tile);
