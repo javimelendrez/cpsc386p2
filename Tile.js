@@ -12,6 +12,7 @@ const TYPES = [
   "STEAL",
   "END"
 ];
+var contact = 0;
 
 const TILE_SPEED = 0.2; // speed of tile's movement
 
@@ -149,12 +150,29 @@ Tile.prototype.update = function() {
     }  
 
   } else if (this.type == "CLOOEY") {
-    /* BLOOEY AI */
+    /* cLOOEY AI */
 
-		var cdistance = dist(rat.x, rat.y, this.x, this.y);
+    var cdistance = dist(rat.x, rat.y, this.x, this.y);
+    //going to make a counter so it knows that it has already made contact
+    //check if impact with ghost
+    //if greater than eequal to 2 divide the score by half
+    // if not then it should just be 0
+    //if contact is 0 they have never met before, if 1 they have made contact and ghost is eating
+    if( contact === 0){
+      if (cdistance < 0.3){
+        if( score >= 2 ){
+          //round the score up
+          score = Math.ceil(score / 2);
+          contact = 1;
+        } else{
+          score = 0;
+          contact = 1;
+        }
+      } 
+    }else{
+      console.log("clooey is eating")
+    }
 
-    if (cdistance < 0.3) 
-      score = score / 2;
 
 		/* movement */
     if (this.moving) // can't move multiple times at once
