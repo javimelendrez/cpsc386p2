@@ -1,4 +1,4 @@
-//team cure
+//team cure 386-01
 //this js file holds the main draw function
 //also contains the field where every barrier, rat, candy, and ghost is located
 /** 2D map of the field;
